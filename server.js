@@ -112,6 +112,10 @@ app.get("/members", isAuth, (req, res) => {
   res.render("members", { image: randomImage });
 });
 
+app.get("/admin", (req, res) => {
+  res.render("admin", { isAuth: req.session.isAuth });
+});
+
 app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) throw err;
