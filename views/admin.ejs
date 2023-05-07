@@ -1,7 +1,50 @@
 <%- include("templates/header") %>
-    <div class="text-center py-5">
+    <% if (error) { %>
+        <div class="alert alert-danger" role="alert">
+            <%= error %>
+        </div>
+        <% } else { %>
+            <div class="text-center py-5">
 
-        hello
+                <h1>Admin Page</h1>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Username</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Admin</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach((user)=> { %>
+                            <tr>
+                                <td>
+                                    <%= user.username %>
+                                </td>
+                                <td>
+                                    <%= user.email %>
+                                </td>
+                                <td>
+                                    <%= user.isAdmin ? 'Yes' : 'No' %>
+                                </td>
+                                <td>
+                                    <% if (user.isAdmin) { %>
+                                        <form action="/demote/<%= user._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">Demote</button>
+                                        </form>
+                                        <% } else { %>
+                                            <form action="/promote/<%= user._id %>" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-success btn-sm">Promote</button>
+                                            </form>
+                                            <% } %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
 
-    </div>
-    <%- include("templates/footer") %>
+
+            </div>
+            <% } %>
+                <%- include("templates/footer") %>

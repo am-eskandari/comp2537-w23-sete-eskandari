@@ -41,6 +41,7 @@ app.use(
   })
 );
 
+// Middleware to check if the user is authenticated
 const isAuth = (req, res, next) => {
   if (req.session.isAuth) {
     next();
@@ -48,6 +49,16 @@ const isAuth = (req, res, next) => {
     res.redirect("/login");
   }
 };
+
+// Middleware to check if the user is an admin
+const isAdmin = (req, res, next) => {
+  if (req.session.isAdmin) {
+    next();
+  } else {
+    res.render("admin", { isAuth: req.session.isAuth, error: "You don't have the required admin privileges." });
+  }
+};
+
 
 app.get("/", (req, res) => {
   res.render("landing", { isAuth: req.session.isAuth });
@@ -63,7 +74,7 @@ app.post("/login", async (req, res) => {
   const user = await UserModel.findOne({ email });
 
   if (!user) {
-    return res.render("login", { err: "" });
+    return res.render("login", { err: "Email or Password does not match." });
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
@@ -73,6 +84,7 @@ app.post("/login", async (req, res) => {
   }
 
   req.session.isAuth = true;
+  req.session.isAdmin = user.isAdmin; // Set the isAdmin field in the session
   res.redirect("/members");
 });
 
@@ -81,7 +93,7 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, isAdmin } = req.body;
 
   if (!email) {
     return res.render("register", { err: "Email is required." });
@@ -99,6 +111,7 @@ app.post("/register", async (req, res) => {
     username: username,
     email: email,
     password: hashedPsw,
+    isAdmin: isAdmin === "true", // Set the isAdmin field based on the checkbox value
   });
 
   await user.save();
@@ -112,9 +125,24 @@ app.get("/members", isAuth, (req, res) => {
   res.render("members", { image: randomImage });
 });
 
-app.get("/admin", (req, res) => {
-  res.render("admin", { isAuth: req.session.isAuth });
+app.get("/admin", isAuth, isAdmin, async (req, res) => {
+  // Fetch all users
+  const users = await UserModel.find();
+  res.render("admin", { users: users, isAuth: req.session.isAuth, error: null });
 });
+
+app.post("/promote/:userId", isAuth, isAdmin, async (req, res) => {
+  const userId = req.params.userId;
+  await UserModel.findByIdAndUpdate(userId, { $set: { isAdmin: true } });
+  res.redirect("/admin");
+});
+
+app.post("/demote/:userId", isAuth, isAdmin, async (req, res) => {
+  const userId = req.params.userId;
+  await UserModel.findByIdAndUpdate(userId, { $set: { isAdmin: false } });
+  res.redirect("/admin");
+});
+
 
 app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
@@ -128,13 +156,12 @@ app.use((req, res) => {
   res.status(404).render("404");
 });
 
-app.get("/logout", (req, res) => {
+app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) throw err;
     res.redirect("/");
   });
 });
-
 
 app.listen(5000, () => {
   console.log("Server started on http://localhost:5000");
