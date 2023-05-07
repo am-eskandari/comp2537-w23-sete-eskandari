@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const MongoDBSession = require("connect-mongodb-session")(session);
 const mongoose = require("mongoose");
+const ObjectId = require("mongoose").Types.ObjectId;
 const Joi = require("joi");
 const app = express();
 require("dotenv").config();
@@ -56,6 +57,17 @@ app.get("/login", (req, res) => {
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
+  // Validate user input
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  });
+
+  const { error } = schema.validate({ email, password });
+  if (error) {
+    return res.render("login", { err: "Invalid email or password format." });
+  }
+
   const user = await UserModel.findOne({ email });
 
   if (!user) {
@@ -80,8 +92,17 @@ app.get("/register", (req, res) => {
 app.post("/register", async (req, res) => {
   const { username, email, password, isAdmin } = req.body;
 
-  if (!email) {
-    return res.render("register", { err: "Email is required." });
+  // Validate user input
+  const schema = Joi.object({
+    username: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+    isAdmin: Joi.boolean(),
+  });
+
+  const { error } = schema.validate({ username, email, password, isAdmin });
+  if (error) {
+    return res.render("register", { err: "Invalid input format." });
   }
 
   let user = await UserModel.findOne({ email });
@@ -121,13 +142,45 @@ app.get("/admin", isAuth, isAdmin, async (req, res) => {
 });
 
 app.post("/promote/:userId", isAuth, isAdmin, async (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
+
+  // Validate user input
+  const schema = Joi.object({
+    userId: Joi.string().custom((value, helpers) => {
+      if (!ObjectId.isValid(value)) {
+        return helpers.error("Invalid ObjectId format");
+      }
+      return value;
+    }),
+  });
+
+  const { error } = schema.validate({ userId });
+  if (error) {
+    return res.redirect("/admin"); // Redirect to admin page if the input is invalid
+  }
+
   await UserModel.findByIdAndUpdate(userId, { $set: { isAdmin: true } });
   res.redirect("/admin");
 });
 
 app.post("/demote/:userId", isAuth, isAdmin, async (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
+
+  // Validate user input
+  const schema = Joi.object({
+    userId: Joi.string().custom((value, helpers) => {
+      if (!ObjectId.isValid(value)) {
+        return helpers.error("Invalid ObjectId format");
+      }
+      return value;
+    }),
+  });
+
+  const { error } = schema.validate({ userId });
+  if (error) {
+    return res.redirect("/admin"); // Redirect to admin page if the input is invalid
+  }
+
   await UserModel.findByIdAndUpdate(userId, { $set: { isAdmin: false } });
   res.redirect("/admin");
 });
