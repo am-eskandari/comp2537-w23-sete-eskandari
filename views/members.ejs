@@ -1,8 +1,26 @@
 <%- include("templates/header") %>
-    <h1>Welcome to the Members page</h1>
-    <img style="height: 300px;" src="/public/<%= image %>" alt="Random Image" />
-    <br>
-    <form action="/logout" method="POST">
-        <button>Logout</button>
-    </form>
+
+    <div class="text-center py-5">
+
+        <h1>Welcome to the Members page</h1>
+
+        <div class="row mb-3 text-center">
+            <div class="col-md-4 themed-grid-col">
+                <img class="img-fluid" src="/public/image1.jpg" alt="Mando and Grogu">
+            </div>
+            <div class="col-md-4 themed-grid-col">
+                <img class="img-fluid" src="/public/image2.jpg" alt="Mando and Grogu">
+            </div>
+            <div class="col-md-4 themed-grid-col">
+                <img class="img-fluid" src="/public/image3.jpg" alt="Mando and Grogu">
+            </div>
+        </div>
+
+        <div class="d-flex gaap-2 justify-content-center py-5">
+            <form action="/logout" method="POST">
+                <button class="btn btn-primary">Logout</button>
+            </form>
+        </div>
+    </div>
+
     <%- include("templates/footer") %>

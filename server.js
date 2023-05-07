@@ -63,13 +63,13 @@ app.post("/login", async (req, res) => {
   const user = await UserModel.findOne({ email });
 
   if (!user) {
-    return res.redirect("/login");
+    return res.render("login", { err: "" });
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    return res.redirect("/login");
+    return res.render("login", { err: "Email or Password does not match." });
   }
 
   req.session.isAuth = true;
@@ -128,12 +128,13 @@ app.use((req, res) => {
   res.status(404).render("404");
 });
 
-app.post("/logout", (req, res) => {
+app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) throw err;
     res.redirect("/");
   });
 });
+
 
 app.listen(5000, () => {
   console.log("Server started on http://localhost:5000");

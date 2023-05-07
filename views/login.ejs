@@ -1,22 +1,36 @@
 <%- include("templates/header") %>
-    <div class="login-form">
+
+    <main class="form-signin w-100 m-auto">
         <% if(err) { %>
             <p style="color: red;">
                 <%= err %>
             </p>
             <% } %>
-                <h3>Login Page</h3>
-                <form action="/login" method="POST">
-                    <div class="input-group">
-                        <label for="email">Email:</label>
-                        <input type="email" name="email" />
-                    </div>
-                    <div class="input-group">
-                        <label for="password">Password:</label>
-                        <input type="password" name="password" />
-                    </div>
-                    <button>Login</button>
-                </form>
-                <a href="/register">Register</a>
-    </div>
+                <div class="d-flex gaap-2 justify-content-center py-5">
+                    <form class="text-center" action="/login" method="POST">
+                        <img class="mb-4" src="/public/grogu-djarin.jpg" alt="Grogu Icon" width="72">
+                        <h1 class="h3 mb-3 fw-normal">Login Page</h1>
+
+                        <div class="form-floating">
+                            <input type="email" class="form-control" name="email" id="floatingInput"
+                                placeholder="name@example.com">
+                            <label for="floatingInput">Email address</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" name="password" id="floatingPassword"
+                                placeholder="Password">
+                            <label for="floatingPassword">Password</label>
+                        </div>
+                        <div class="checkbox mb-3">
+                            <label>
+                                <input type="checkbox" value="remember-me"> Remember me
+                            </label>
+                        </div>
+                        <button class="w-100 btn btn-lg btn-primary" type="submit">Login</button>
+                        <p>...Or <a href="/register">Sign-up </a> if you don't have an account</p>
+
+                    </form>
+                </div>
+    </main>
+
     <%- include("templates/footer") %>

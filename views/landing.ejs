@@ -1,14 +1,17 @@
 <%- include("templates/header") %>
-    <h3>This is the Landing Page of The Website</h3>
-    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+    <div class="text-center py-5">
 
-        <% if (locals.isAuth) { %>
-            <li><a href="/members" class="btn btn-outline-primary me-2">Members</a></li>
-            <li><a href="/logout" class="btn btn-primary">Sign Out</a></li>
-            <% } else { %>
-                <li><a href="/login" class="btn btn-outline-primary me-2">Login</a></li>
-                <li><a href="/register" class="btn btn-primary">Sign-up</a></li>
-                <% } %>
-    </ul>
+        <h3>This is the Landing Page of The Website</h3>
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+
+            <% if (locals.isAuth) { %>
+                <li><a href="/members" class="btn btn-outline-primary me-2">Members</a></li>
+                <li><a href="/logout" class="btn btn-primary">Sign Out</a></li>
+                <% } else { %>
+                    <li><a href="/login" class="btn btn-outline-primary me-2">Login</a></li>
+                    <li><a href="/register" class="btn btn-primary">Sign-up</a></li>
+                    <% } %>
+        </ul>
+    </div>
 
     <%- include("templates/footer") %>
