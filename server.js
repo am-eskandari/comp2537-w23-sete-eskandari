@@ -3,12 +3,16 @@ const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const MongoDBSession = require("connect-mongodb-session")(session);
 const mongoose = require("mongoose");
+const Joi = require("joi");
 const app = express();
 require("dotenv").config();
 
 const UserModel = require("./models/User");
 const mongoURI = process.env.MONGO_URI;
 const port = process.env.PORT;
+
+const isAuth = require("./middlewares/isAuth");
+const isAdmin = require("./middlewares/isAdmin");
 
 mongoose
   .connect(mongoURI, {
@@ -40,25 +44,6 @@ app.use(
     },
   })
 );
-
-// Middleware to check if the user is authenticated
-const isAuth = (req, res, next) => {
-  if (req.session.isAuth) {
-    next();
-  } else {
-    res.redirect("/login");
-  }
-};
-
-// Middleware to check if the user is an admin
-const isAdmin = (req, res, next) => {
-  if (req.session.isAdmin) {
-    next();
-  } else {
-    res.render("admin", { isAuth: req.session.isAuth, error: "You don't have the required admin privileges." });
-  }
-};
-
 
 app.get("/", (req, res) => {
   res.render("landing", { isAuth: req.session.isAuth });
@@ -128,7 +113,11 @@ app.get("/members", isAuth, (req, res) => {
 app.get("/admin", isAuth, isAdmin, async (req, res) => {
   // Fetch all users
   const users = await UserModel.find();
-  res.render("admin", { users: users, isAuth: req.session.isAuth, error: null });
+  res.render("admin", {
+    users: users,
+    isAuth: req.session.isAuth,
+    error: null,
+  });
 });
 
 app.post("/promote/:userId", isAuth, isAdmin, async (req, res) => {
@@ -142,7 +131,6 @@ app.post("/demote/:userId", isAuth, isAdmin, async (req, res) => {
   await UserModel.findByIdAndUpdate(userId, { $set: { isAdmin: false } });
   res.redirect("/admin");
 });
-
 
 app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
